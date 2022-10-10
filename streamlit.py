@@ -55,8 +55,13 @@ def first_try():
 
     st.pyplot(fx.PlotPitch(pass_bet, avg_loc))
 
+    G = fx.ReturnNXPassNetwork(pass_bet)
 
+    st.pyplot(fx.PlotPlayerDegrees(G))
 
+    shots_tidy = fx.CreatexGDF(match_id=match_id)
+
+    st.pyplot(fx.PlotxG(shots_tidy, title="The xG Progress Chart Between the Teams (need to automate this)"))
     return
 
 
