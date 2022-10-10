@@ -27,20 +27,19 @@ sidebar_options = (
 
 def first_try():
     st.markdown("## Simple Data Analysis Demo:")
-
     st.markdown("Below is an interactive example of how our football passing network models work:")
+    
     competitions = fx.ReturnCompetitions()
     competition = st.selectbox("Choose the competition here (Currently only tested FIFA World Cup)", competitions)
     
     comp = competition
     comp_id, season_id = fx.PullSBData(comp)
-
     match_data = fx.ReturnMatchIDs(comp_id, season_id)
-
+    
     input_id = st.selectbox("Choose a Match:", match_data.keys())
     match_id = match_data.get(input_id)
 
-    hometeam = st.text_input("Input a hometeam here:", "Brazil")
+    hometeam = st.radio("Input a hometeam here:", input_id.rsplit(" vs "))
 
     if st.button("Run the analysis:"):
         events = fx.CreateEventsDF(

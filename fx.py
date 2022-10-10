@@ -181,13 +181,13 @@ def PlotPlayerDegrees(G):
     ax[0].set_title("Successful passes (degrees) of each player (vertex)", size=10)
     
     ax[1].stem(indeg_ordered['in_degrees'])
-    ax[1].set_xticks(indeg_x_range, deg_ordered['player'], rotation=90)
+    ax[1].set_xticks(indeg_x_range, indeg_ordered['player'], rotation=90)
     ax[1].set_yticks(indeg_y_range)
     ax[1].set_ylabel("in degree (total number of passes received)")
     ax[1].set_title("Successful passes received (indegrees) for each player (vertex)", size=10)
 
     ax[2].stem(outdeg_ordered['out_degrees'])
-    ax[2].set_xticks(outdeg_x_range, deg_ordered['player'], rotation=90)
+    ax[2].set_xticks(outdeg_x_range, outdeg_ordered['player'], rotation=90)
     ax[2].set_yticks(outdeg_y_range)
     ax[2].set_ylabel("out degree (total number of passes given)")
     ax[2].set_title("Successful passes given (outdegrees) by each player (vertex)", size=10)
