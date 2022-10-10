@@ -30,7 +30,7 @@ def first_try():
 
     st.markdown("Below is an interactive example of how our football passing network models work:")
     competitions = fx.ReturnCompetitions()
-    competition = st.radio("Choose the competition here (Currently only tested FIFA World Cup)", competitions)
+    competition = st.selectbox("Choose the competition here (Currently only tested FIFA World Cup)", competitions)
     comp = competition
 
     match_id = st.text_input("Input a match_id here:", "8658")
