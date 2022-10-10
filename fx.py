@@ -26,7 +26,7 @@ def PullSBData(competition_name="FIFA World Cup"):
 def ReturnMatchIDs(comp_id, season_id):
     """Returns MatchIDs and Teams (for streamlit)"""
     matches = sb.matches(competition_id = comp_id, season_id = season_id)
-    matchdict = {list(matches["match_id"])[i]: f'{list(matches["home_team"])[i]} vs {list(matches["away_team"])[i]}' for i in range(len(list(matches["match_id"])))}
+    matchdict = {f'{list(matches["home_team"])[i]} vs {list(matches["away_team"])[i]}': list(matches["match_id"])[i] for i in range(len(list(matches["match_id"])))}
     return matchdict
 
 def ReturnCompetitions():
