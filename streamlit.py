@@ -32,6 +32,8 @@ def first_try():
 
     if competition == "FIFA World Cup":
         comp = "FIFA World Cup"
+    else:
+        st.write("Can you not read?!")
 
     match_id = st.text_input("Input a match_id here:", "8658")
     hometeam = st.text_input("Input a hometeam here:", "France")
