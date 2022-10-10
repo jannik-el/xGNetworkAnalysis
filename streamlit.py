@@ -21,6 +21,9 @@ sidebar_options = (
     "First Data Analysis",
     )
 
+def first_try():
+
+
 
 def main():
 
@@ -32,14 +35,17 @@ def main():
     if mode_two == sidebar_options[0]:
         start_page()
 
-    elif mode_two == sidebar_options[1]:
-        # tokenizer_page()
+    # elif mode_two == sidebar_options[1]:
+    #     # tokenizer_page()
 
-    elif mode_two == sidebar_options[2]:
-        # model_demo()
+    # elif mode_two == sidebar_options[2]:
+    #     # model_demo()
 
-    elif mode_two == sidebar_options[3]:
-        # trump_demo()
+    # elif mode_two == sidebar_options[3]:
+    #     # trump_demo()
+
+    else:
+        return
 
 
 if __name__ == "__main__":
