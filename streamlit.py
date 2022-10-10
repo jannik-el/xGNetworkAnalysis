@@ -34,9 +34,26 @@ def first_try():
         comp = "FIFA World Cup"
     else:
         st.write("Can you not read?!")
+    comp = "FIFA World Cup"
 
     match_id = st.text_input("Input a match_id here:", "8658")
     hometeam = st.text_input("Input a hometeam here:", "France")
+
+    comp_id, season_id = fx.PullSBData(comp)
+    
+    events = fx.CreateEventsDF(
+    comp_id=comp_id, 
+    season_id=season_id, 
+    match_id=match_id, 
+    hometeam=hometeam
+    )
+
+    pass_df = fx.CreatePassDF(events, hometeam)
+
+    pass_bet, avg_loc = fx.ReturnAvgPositionsDF(pass_df)
+
+    st.pyplot(fx.PlotPitch(pass_bet, avg_loc))
+
 
 
     return
