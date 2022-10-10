@@ -1,7 +1,9 @@
 # import libs here
 import streamlit as st
 from PIL import Image
-
+import sys
+sys.path.insert(0, "./")
+import fx
 
 
 ##### HEADER #####
@@ -24,6 +26,16 @@ sidebar_options = (
 def first_try():
     st.markdown("## Simple Data Analysis Demo:")
 
+    st.markdown("Below is an interactive example of how our football passing network models work:")
+    competition = st.radio("Choose the competition here (Currently only tested FIFA World Cup)", ("FIFA World Cup"))
+
+    if competition == "FIFA World Cup":
+        comp = "FIFA World Cup"
+
+    match_id = st.text_input("Input a match_id here:", "8658")
+    hometeam = st.text_input("Input a hometeam here:", "France")
+
+
     return
 
 
@@ -36,7 +48,7 @@ def main():
 
     
     if mode_two == sidebar_options[0]:
-        start_page()
+        first_try()
 
     # elif mode_two == sidebar_options[1]:
     #     # tokenizer_page()
