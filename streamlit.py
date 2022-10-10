@@ -8,7 +8,7 @@ import fx
 
 
 ##### HEADER #####
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 st.title("xG Football Passing Network Analysis")
