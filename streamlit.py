@@ -31,8 +31,8 @@ def first_try():
     st.markdown("Below is an interactive example of how our football passing network models work:")
     competitions = fx.ReturnCompetitions()
     competition = st.selectbox("Choose the competition here (Currently only tested FIFA World Cup)", competitions)
+    
     comp = competition
-
     comp_id, season_id = fx.PullSBData(comp)
 
     match_data = fx.ReturnMatchIDs(comp_id, season_id)
@@ -40,29 +40,31 @@ def first_try():
     input_id = st.selectbox("Choose a Match:", match_data.keys())
     match_id = match_data.get(input_id)
 
-    hometeam = st.text_input("Input a hometeam here:", "France")
+    hometeam = st.text_input("Input a hometeam here:", "Brazil")
 
-    
-    events = fx.CreateEventsDF(
-    comp_id=comp_id, 
-    season_id=season_id, 
-    match_id=match_id, 
-    hometeam=hometeam
-    )
+    if st.button("Run the analysis:"):
+        events = fx.CreateEventsDF(
+        comp_id=comp_id, 
+        season_id=season_id, 
+        match_id=match_id, 
+        hometeam=hometeam
+        )
 
-    pass_df = fx.CreatePassDF(events, hometeam)
+        pass_df = fx.CreatePassDF(events, hometeam)
 
-    pass_bet, avg_loc = fx.ReturnAvgPositionsDF(pass_df)
+        pass_bet, avg_loc = fx.ReturnAvgPositionsDF(pass_df)
 
-    st.pyplot(fx.PlotPitch(pass_bet, avg_loc))
+        st.pyplot(fx.PlotPitch(pass_bet, avg_loc))
 
-    G = fx.ReturnNXPassNetwork(pass_bet)
+        G = fx.ReturnNXPassNetwork(pass_bet)
 
-    st.pyplot(fx.PlotPlayerDegrees(G))
+        st.pyplot(fx.PlotPlayerDegrees(G))
 
-    shots_tidy = fx.CreatexGDF(match_id=match_id)
+        shots_tidy = fx.CreatexGDF(match_id=match_id)
 
-    st.pyplot(fx.PlotxG(shots_tidy, title="The xG Progress Chart Between the Teams (need to automate this)"))
+        st.pyplot(fx.PlotxG(shots_tidy, title="The xG Progress Chart Between the Teams (need to automate this)"))
+    else:
+        st.write("Click the button to run the data analysis")
     return
 
 
