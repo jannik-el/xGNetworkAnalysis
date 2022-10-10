@@ -36,10 +36,8 @@ def first_try():
     comp_id, season_id = fx.PullSBData(comp)
 
     match_data = fx.ReturnMatchIDs(comp_id, season_id)
-    
 
-
-    input_id = st.selectbox("Choose a Match:" match_data.values())
+    input_id = st.selectbox("Choose a Match:", match_data.values())
     match_id = match_data.get(input_id)
 
     hometeam = st.text_input("Input a hometeam here:", "France")
