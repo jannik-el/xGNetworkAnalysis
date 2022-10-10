@@ -1,5 +1,6 @@
 # import libs here
 import streamlit as st
+from PIL import Image
 
 
 
@@ -15,7 +16,6 @@ By Juraj Septak 🇸🇰, Gusts Gustavs Grīnbergs 🇱🇻, Franek Liszka 🇵�
 st.write("------------------------------------------")
 itu_logo = Image.open("./misc/Logo_IT_University_of_Copenhagen.jpg")
 st.sidebar.image(itu_logo)
-
 
 sidebar_options = (
     "First Data Analysis",
