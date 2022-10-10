@@ -1,0 +1,4 @@
+mplsoccer==1.1.6
+pitch==0.0.6
+networkx==2.8.6
+statsbombpy==1.5.0
