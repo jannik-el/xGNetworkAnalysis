@@ -1,6 +1,7 @@
 # import libs here
 import streamlit as st
 from PIL import Image
+import networkx as nx
 import sys
 sys.path.insert(0, "./")
 import fx
