@@ -22,6 +22,9 @@ sidebar_options = (
     )
 
 def first_try():
+    st.markdown("## Simple Data Analysis Demo:")
+
+    return
 
 
 
