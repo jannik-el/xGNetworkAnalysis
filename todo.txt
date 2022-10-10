@@ -1,0 +1,6 @@
+- fix the weights of the nx directed network graph [Gusts]
+- plot CxG of the france vs. croatia df [Frank in 10 seconds]
+- automate data ingestion function for all games [Jannik]
+- plot different network props (eg: Cohesion, Triangulation, Resistance, avg degree, clustering coeff, avg clustering coeff) for a single team passing network 
+- try to make a df with network props + xG 
+- divide data up into windows after a goal (from both teams) and substitution
