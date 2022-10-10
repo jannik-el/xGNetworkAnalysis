@@ -29,13 +29,9 @@ def first_try():
     st.markdown("## Simple Data Analysis Demo:")
 
     st.markdown("Below is an interactive example of how our football passing network models work:")
-    competition = st.radio("Choose the competition here (Currently only tested FIFA World Cup)", ('FIFA World Cup', "Don't Touch this One"))
-
-    if competition == "FIFA World Cup":
-        comp = "FIFA World Cup"
-    else:
-        st.write("Can you not read?!")
-    comp = "FIFA World Cup"
+    competitions = fx.ReturnCompetitions()
+    competition = st.radio("Choose the competition here (Currently only tested FIFA World Cup)", competitions)
+    comp = competition
 
     match_id = st.text_input("Input a match_id here:", "8658")
     hometeam = st.text_input("Input a hometeam here:", "France")
