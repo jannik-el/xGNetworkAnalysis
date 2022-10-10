@@ -33,10 +33,17 @@ def first_try():
     competition = st.selectbox("Choose the competition here (Currently only tested FIFA World Cup)", competitions)
     comp = competition
 
-    match_id = st.text_input("Input a match_id here:", "8658")
+    comp_id, season_id = fx.PullSBData(comp)
+
+    match_data = fx.ReturnMatchIDs(comp_id, season_id)
+    
+
+
+    input_id = st.selectbox("Choose a Match:" match_data.values())
+    match_id = match_data.get(input_id)
+
     hometeam = st.text_input("Input a hometeam here:", "France")
 
-    comp_id, season_id = fx.PullSBData(comp)
     
     events = fx.CreateEventsDF(
     comp_id=comp_id, 

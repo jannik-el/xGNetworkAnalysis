@@ -23,12 +23,11 @@ def PullSBData(competition_name="FIFA World Cup"):
     season_id = int(competitions[competitions['competition_name']==competition_name]['season_id'])
     return comp_id, season_id
 
-def ReturnMatchIds(comp_id, season_id):
+def ReturnMatchIDs(comp_id, season_id):
     """Returns MatchIDs and Teams (for streamlit)"""
-    matches = sb.matches(competition_id=comp_id, season_id=season_id)
-    map_ids = lambda x, y, z: [x, y,z]
-    result = map(map_ids, list(matches["match_id"]), list(matches["home_team"]), list(matches["away_team"]))
-    return list(result)
+    matches = sb.matches(competition_id = comp_id, season_id = season_id)
+    matchdict = {list(matches["match_id"])[i]: f'{list(matches["home_team"])[i]} vs {list(matches["away_team"])[i]}' for i in range(len(list(matches["match_id"])))}
+    return matchdict
 
 def ReturnCompetitions():
     """Returns Competitions in Statsbomb Dataset"""
