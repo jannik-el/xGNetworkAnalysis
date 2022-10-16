@@ -241,13 +241,13 @@ def CreatexGDF(match_id):
     shots_team2_xg = df_shots_team2['shot_statsbomb_xg'].tolist()
     shots_team2_xg_minute = df_shots_team2['minute'].tolist()
     
-    team1_xg_cumu = np.cumsum(shots_team1_xg)
-    team2_xg_cumu = np.cumsum(shots_team2_xg)
+    team1_xg_cumu = (np.cumsum(shots_team1_xg)).tolist()
+    team2_xg_cumu = (np.cumsum(shots_team2_xg)).tolist()
 
     shots_team1_xg_minute = [0] + shots_team1_xg_minute + [int((shots_team1_xg_minute[-1] + 1))]
     shots_team2_xg_minute = [0] + shots_team2_xg_minute + [int((shots_team1_xg_minute[-1] + 1))]
-    team1_xg_cumu = [0] + team1_xg_cumu.tolist() + [100]
-    team2_xg_cumu = [0] + team2_xg_cumu.tolist() + [100]
+    team1_xg_cumu = [0] + team1_xg_cumu + [(team1_xg_cumu[-1])]
+    team2_xg_cumu = [0] + team2_xg_cumu + [(team1_xg_cumu[-1])]
 
     return [team1, shots_team1_xg_minute, team1_xg_cumu, team2, shots_team2_xg_minute, team2_xg_cumu]
 
