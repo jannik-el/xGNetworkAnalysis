@@ -246,8 +246,8 @@ def CreatexGDF(match_id):
 
     shots_team1_xg_minute = [0] + shots_team1_xg_minute + [int((shots_team1_xg_minute[-1] + 1))]
     shots_team2_xg_minute = [0] + shots_team2_xg_minute + [int((shots_team1_xg_minute[-1] + 1))]
-    team1_xg_cumu = [0] + team1_xg_cumu.tolist() + [int(team1_xg_cumu.tolist()[-1])]
-    team2_xg_cumu = [0] + team2_xg_cumu.tolist() + [int(team2_xg_cumu.tolist()[-1])]
+    team1_xg_cumu = [0] + team1_xg_cumu.tolist() + [100]
+    team2_xg_cumu = [0] + team2_xg_cumu.tolist() + [100]
 
     return [team1, shots_team1_xg_minute, team1_xg_cumu, team2, shots_team2_xg_minute, team2_xg_cumu]
 
