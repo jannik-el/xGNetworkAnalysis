@@ -59,9 +59,9 @@ def first_try():
 
         st.pyplot(fx.PlotPlayerDegrees(G))
 
-        shots_tidy = fx.CreatexGDF(match_id=match_id)
+        xG_data = fx.CreatexGDF(match_id=match_id)
 
-        st.pyplot(fx.PlotxG(shots_tidy, title="The xG Progress Chart Between the Teams (need to automate this)"))
+        st.pyplot(fx.PlotxG(xG_data))
     else:
         st.write("Click the button to run the data analysis")
     return
