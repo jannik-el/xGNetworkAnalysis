@@ -166,10 +166,11 @@ def PlotPlayerDegrees(G):
     Takes: G (NX Pass Network)
     Returns: plt.show() of different 
     """
-    dic = dict(nx.degree(G))
-    player = dic.keys()
+    
 
     # degrees
+    dic = dict(nx.degree(G))
+    player = dic.keys()
     degrees = dic.values()
     degree_fr = pd.DataFrame({'player':player, 'degrees':degrees})
     deg_ordered = degree_fr.sort_values(by='degrees')
@@ -177,6 +178,8 @@ def PlotPlayerDegrees(G):
     deg_y_range = range(math.ceil(max(degree_fr.degrees)))
 
     # indegrees
+    dic = dict(G.in_degree())
+    player = dic.keys()
     in_degrees = dic.values()
     in_degree_fr = pd.DataFrame({'player':player, 'in_degrees':in_degrees})
     indeg_ordered = in_degree_fr.sort_values(by = 'in_degrees')
@@ -184,6 +187,8 @@ def PlotPlayerDegrees(G):
     indeg_y_range = range(math.ceil(max(in_degree_fr.in_degrees)))
 
     # outdegrees
+    dic = dict(G.out_degree())
+    player = dic.keys()
     out_degrees = dic.values()
     out_degree = pd.DataFrame({'player':player, 'out_degrees':out_degrees})
     outdeg_ordered = out_degree.sort_values(by = 'out_degrees')
@@ -197,7 +202,7 @@ def PlotPlayerDegrees(G):
     ax[0].set_yticks(deg_y_range)
     ax[0].set_ylabel("degree (total number of passes played)")
     ax[0].set_title("Successful passes (degrees) of each player (vertex)", size=10)
-    
+
     ax[1].stem(indeg_ordered['in_degrees'])
     ax[1].set_xticks(indeg_x_range, indeg_ordered['player'], rotation=90)
     ax[1].set_yticks(indeg_y_range)
@@ -209,6 +214,7 @@ def PlotPlayerDegrees(G):
     ax[2].set_yticks(outdeg_y_range)
     ax[2].set_ylabel("out degree (total number of passes given)")
     ax[2].set_title("Successful passes given (outdegrees) by each player (vertex)", size=10)
+
     return plt.show()
 
 def CreatexGDF(match_id):
