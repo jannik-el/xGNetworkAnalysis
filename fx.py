@@ -34,6 +34,17 @@ def ReturnCompetitions():
     competitions = sb.competitions()
     return list(competitions["competition_name"].unique())
 
+def ReturnScoreInfo(comp_id, season_id, match_id):
+    """
+    Returns: [MatchID, DateTime of Match Kickoff, Teams [Home, Away], Scores [Home, Away]]
+    """
+    scores_df = sb.matches(comp_id, season_id)
+    m_id = scores_df[scores_df["match_id"] == match_id]
+    date_time = str(m_id["match_date"]).split()[1] + " " + str(m_id["kick_off"]).split()[1]
+    teams = [str(m_id["home_team"]).split()[1], str(m_id["away_team"]).split()[1]]
+    scores = [int(m_id["home_score"]), int(m_id["away_score"])]
+    return [match_id, date_time, teams, scores]
+
 def CreateEventsDF(comp_id, season_id, match_id, hometeam):
     """
     Takes: comp_id, season_id, match_id, hometeam (str)
@@ -60,26 +71,34 @@ def CreatePassDF(events, hometeam):
     pass_df['passer'] = pass_df['player']
     return pass_df
 
-# not really sure what this function does and why
-def GetPlayers(events):
-    """
-    Takes: events (created by CreateEventsDF)
-    returns: players_x (a DF of all players in a team)
-    """
-    tact = events[events['tactics'].isnull() == False]
-    tact = tact[['tactics', 'team', 'type']]
-    team_x = list(tact['team'])[0]
-    tact_x = tact[tact['team'] == team_x]['tactics']
-    dict_x = tact_x[0]['lineup']
-    lineup_x = pd.DataFrame.from_dict(dict_x)
-    players_x = {}
-    for i in range(len(lineup_x)):
-        key = lineup_x.player[i]['name']
-        val = lineup_x.jersey_number[i]
-        players_x[key] = str(val)
-    return players_x
+# # not really sure what this function does and why
+# def GetPlayers(events):
+#     """
+#     Takes: events (created by CreateEventsDF)
+#     returns: players_x (a DF of all players in a team)
+#     """
+#     tact = events[events['tactics'].isnull() == False]
+#     tact = tact[['tactics', 'team', 'type']]
+#     team_x = list(tact['team'])[0]
+#     tact_x = tact[tact['team'] == team_x]['tactics']
+#     dict_x = tact_x[0]['lineup']
+#     lineup_x = pd.DataFrame.from_dict(dict_x)
+#     players_x = {}
+#     for i in range(len(lineup_x)):
+#         key = lineup_x.player[i]['name']
+#         val = lineup_x.jersey_number[i]
+#         players_x[key] = str(val)
+#     return players_x
 
-def ReturnSubstitionMinutes(events, team):
+def GetPlayers(match_id, team):
+    lineup = sb.lineups(match_id=match_id)[team]
+    lineup['player_nickname'].fillna(lineup['player_name'], inplace=True)
+    players = list(lineup['player_nickname'])
+    return dict(zip(list(lineup['player_nickname']), list(lineup['jersey_number'])))
+
+
+
+def ReturnSubstitutionMinutes(events, team):
     """
     Takes: events, team (str)
     Returns: List of Lists with minutes and Seconds of Substitution
@@ -87,13 +106,12 @@ def ReturnSubstitionMinutes(events, team):
     subs = events[events['type']=='Substitution']
     subs = subs[subs['team']==team]
     mapit = lambda n, m : [n, m]
-    result = map(mapit, list(subs['minute']), list(subs['second']))
-    return list(result)
+    return list(map(mapit, list(subs['minute']), list(subs['second'])))
 
 def ReturnAvgPositionsDF(pass_df):
     """
     Takes: pass_df
-    Returns: pass_bet (DF), avg_loc(DF)
+    Returns: pass_bet (DF of passes between), avg_loc(DF of average locations)
     """
     pass_loc = pass_df['location']
     pass_loc = pd.DataFrame(pass_loc.to_list(), columns=['x', 'y'])
@@ -193,40 +211,52 @@ def PlotPlayerDegrees(G):
     ax[2].set_title("Successful passes given (outdegrees) by each player (vertex)", size=10)
     return plt.show()
 
-def _ReturnXTicks_(period, minute):
-    """
-    needed for CreatexG
-    """
-    if period == 1:
-        return '1st-' + str(minute)
-    else:
-        return '2nd-' + str(minute)
-
-def CreatexGDF(match_id=8658):
+def CreatexGDF(match_id):
     """
     Takes: Match ID
-    Returns: shots_tidy (xGDF)
+    # Returns: list of xG data + team names in that order:
+                [Team 1 name, Team 1 xG minutes, Team 1 Cumulative xG, Team 2 name, Team 2 xG minutes, Team 2 Cumulative xG]
     """
+
     events = sb.events(match_id)
-    df_shots = events[events['type']=='Shot']
-    df_shots = df_shots[['timestamp', 'period', 'minute', 'team', 'shot_outcome', 'shot_statsbomb_xg']]
+    df_shots = events[['location', 'minute', 'player', 'team', 'shot_outcome', 'shot_statsbomb_xg', 'shot_technique', 'shot_type']]
+    df_shots = df_shots[df_shots['shot_outcome'].isnull()==False].reset_index()
 
-    df_shots['time'] = df_shots.apply(lambda x: _ReturnXTicks_(x['period'], x['minute']), axis=1)
+    teams = list(df_shots['team'].unique())
+    team1 = teams[0]
+    team2 = teams[1]
+
+    df_shots_team1 = df_shots[df_shots['team'] == team1].reset_index()
+    df_shots_team2 = df_shots[df_shots['team'] == team2].reset_index()
+
+    shots_team1_xg = df_shots_team1['shot_statsbomb_xg'].tolist()
+    shots_team1_xg_minute = df_shots_team1['minute'].tolist()
+
+    shots_team2_xg = df_shots_team2['shot_statsbomb_xg'].tolist()
+    shots_team2_xg_minute = df_shots_team2['minute'].tolist()
     
-    shots_tidy = df_shots.groupby(['team', 'period', 'minute', 'time', 'shot_outcome']).sum().groupby(level=0).cumsum().reset_index()
-    shots_tidy = shots_tidy.sort_values(['period', 'minute'])
-    return shots_tidy
+    team1_xg_cumu = np.cumsum(shots_team1_xg)
+    team2_xg_cumu = np.cumsum(shots_team2_xg)
 
-def PlotxG(shots_tidy, title="The xG Progress Chart Between France against Croatia"):
-    """
-    Takes: shots_tidy (xGDF)
-    Returns: plt.show() of a xG Progress Chart
-    """
-    fig, ax = plt.subplots(figsize=(10, 4))
+    shots_team1_xg_minute = [0] + shots_team1_xg_minute
+    shots_team2_xg_minute = [0] + shots_team2_xg_minute
+    team1_xg_cumu = [0] + team1_xg_cumu.tolist()
+    team2_xg_cumu = [0] + team2_xg_cumu.tolist()
 
-    sns.lineplot(x='time', y='shot_statsbomb_xg', hue='team', data=shots_tidy, ax=ax)
+    return [team1, shots_team1_xg_minute, team1_xg_cumu, team2, shots_team2_xg_minute, team2_xg_cumu]
 
-    ax.title.set_text(title)
 
-    plt.xticks(rotation=45)
+def PlotxG(xg_data):
+    team1, shots_team1_xg_minute, team1_xg_cumu, team2, shots_team2_xg_minute, team2_xg_cumu = xg_data
+
+    fig, ax = plt.subplots(figsize=(13.5, 8))
+
+    plt.xticks(range(0, 105, 15))
+    plt.xlabel('Time in Minutes')
+    plt.ylabel('xG')
+
+    ax.step(shots_team1_xg_minute, team1_xg_cumu, where='post', color='black', label = team1, linewidth=6)
+    ax.step(shots_team2_xg_minute, team2_xg_cumu, where='post', color='red', label = team2, linewidth=6)
+    ax.legend(borderpad=1, markerscale=0.5, labelspacing=1.5, fontsize=10)
+    ax.title.set_text(f"The xG Progress Chart Between {team1} against {team2}")
     return plt.show()
