@@ -30,8 +30,15 @@ def first_try():
     st.markdown("Below is an interactive example of how our football passing network models work:")
     
     competitions = fx.ReturnCompetitions()
-    competition = st.selectbox("Choose the competition here (Currently only tested FIFA World Cup)", competitions)
-    
+    competition = st.selectbox("Choose the competition", competitions)
+
+    competition_data = competitions[competitions['competition_name']==competition_name]
+    comp_id = competition_data[competition_data['competition_name']==competition_name]['competition_id'].iloc[0]
+
+    selected_season = st.selectbox("Choose a season", season)
+    competition_data = competition_data[competition_data['season_name'] == selected_season]
+    season_id = competition_data['season_id'].iloc[0] #season_id for the season_name
+
     comp = competition
     comp_id, season_id = fx.PullSBData(comp)
     match_data = fx.ReturnMatchIDs(comp_id, season_id)
