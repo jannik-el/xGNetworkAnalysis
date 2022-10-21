@@ -32,15 +32,12 @@ def first_try():
     competitions = fx.ReturnCompetitions()
     competition = st.selectbox("Choose the competition", competitions)
 
-    competition_data = competitions[competitions['competition_name']==competition_name]
-    comp_id = competition_data[competition_data['competition_name']==competition_name]['competition_id'].iloc[0]
-
+    seasons = fx.ReturnSeasons(competition)
     selected_season = st.selectbox("Choose a season", season)
     competition_data = competition_data[competition_data['season_name'] == selected_season]
     season_id = competition_data['season_id'].iloc[0] #season_id for the season_name
 
-    comp = competition
-    comp_id, season_id = fx.PullSBData(comp)
+    comp_id, season_id = fx.PullSBData(competition, selected_season)
     match_data = fx.ReturnMatchIDs(comp_id, season_id)
     
     input_id = st.selectbox("Choose a Match:", match_data.keys())

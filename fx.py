@@ -13,7 +13,7 @@ from scipy.ndimage import gaussian_filter
 from statsbombpy import sb
 
 # funcs
-def PullSBData(competition_name="FIFA World Cup"):
+def PullSBData(competition_name, season):
     """
     Takes: Competition Name
     Returns: comp_id, season_id
@@ -33,6 +33,12 @@ def ReturnCompetitions():
     """Returns Competitions in Statsbomb Dataset"""
     competitions = sb.competitions()
     return list(competitions["competition_name"].unique())
+
+def ReturnSeasons(competition_name):
+    """Returns Seasons in Statsbomb Dataset"""
+    competitions = sb.competitions()
+    comp_id = competition_data[competition_data['competition_name']==competition_name]['competition_id'].iloc[0]
+    return list(comp_id['season_name'].unique())
 
 def ReturnScoreInfo(comp_id, season_id, match_id):
     """
