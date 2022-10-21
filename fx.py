@@ -37,7 +37,7 @@ def ReturnCompetitions():
 def ReturnSeasons(competition_name):
     """Returns Seasons in Statsbomb Dataset"""
     competitions = sb.competitions()
-    comp_id = competition_data[competition_data['competition_name']==competition_name]['competition_id'].iloc[0]
+    comp_id = competitions[competitions['competition_name']==competitions]['competition_id'].iloc[0]
     return list(comp_id['season_name'].unique())
 
 def ReturnScoreInfo(comp_id, season_id, match_id):
