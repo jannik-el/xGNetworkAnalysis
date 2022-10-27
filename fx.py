@@ -273,7 +273,7 @@ def CreatexGDF(match_id):
     team2_xg_cumu = (np.cumsum(shots_team2_xg)).tolist()
 
     shots_team1_xg_minute = [0] + shots_team1_xg_minute + [int((shots_team1_xg_minute[-1] + 1))]
-    shots_team2_xg_minute = [0] + shots_team2_xg_minute + [int((shots_team1_xg_minute[-1] + 1))]
+    shots_team2_xg_minute = [0] + shots_team2_xg_minute + [int((shots_team2_xg_minute[-1] + 1))]
     team1_xg_cumu = [0] + team1_xg_cumu + [(team1_xg_cumu[-1])]
     team2_xg_cumu = [0] + team2_xg_cumu + [(team2_xg_cumu[-1])]
 
