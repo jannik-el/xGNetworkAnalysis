@@ -52,7 +52,7 @@ def first_try():
 
         col1, col2, col3 = st.columns(3)
 
-        col2.metric(input_id, f"{match_info[3][0]} : {match_info[3][1]})")
+        col3.metric(input_id, f"{match_info[3][0]} : {match_info[3][1]}")
 
         pass_df = fx.CreatePassDF(events, hometeam)
         pass_bet, avg_loc = fx.ReturnAvgPositionsDF(pass_df)
