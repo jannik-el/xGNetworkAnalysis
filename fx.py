@@ -15,16 +15,16 @@ from statsbombpy import sb
 # funcs
 def ReturnComp_Id(competition_name):
     """
-    Takes: Competition Name
+    Takes: Competition Name (str)
     Returns: comp_id
     """
     competitions = sb.competitions()
-    comp_id = int(competitions[competitions['competition_name']==competition_name]['competition_id'][0])
+    comp_id = list(competitions[competitions['competition_name']==competition_name]['competition_id'])[0]
     return comp_id
 
 def ReturnMatchIDs(comp_id, season_id):
     """
-    Takes: Competition ID and Season ID
+    Takes: Competition ID and Season ID (both int)
     Returns: MatchIDs and Teams (for streamlit)
     """
     matches = sb.matches(competition_id = comp_id, season_id = season_id)
@@ -41,7 +41,7 @@ def ReturnCompetitions():
 
 def ReturnSeasons(competition_name):
     """
-    Takes: Competition
+    Takes: Competition name (str)
     Returns: Seasons in Statsbomb Dataset
     """
     competitions = sb.competitions()
@@ -50,7 +50,7 @@ def ReturnSeasons(competition_name):
 
 def ReturnSeason_Id(season):
     """
-    Takes: Season name
+    Takes: Season name (str)
     Returns: Season ID
     """
     competition_data = sb.competitions()
@@ -60,6 +60,7 @@ def ReturnSeason_Id(season):
 
 def ReturnScoreInfo(comp_id, season_id, match_id):
     """
+    Takes: Competition ID, season ID and match ID (all int)
     Returns: [MatchID, DateTime of Match Kickoff, Teams [Home, Away], Scores [Home, Away]]
     """
     scores_df = sb.matches(comp_id, season_id)
@@ -71,7 +72,7 @@ def ReturnScoreInfo(comp_id, season_id, match_id):
 
 def CreateEventsDF(comp_id, season_id, match_id, hometeam):
     """
-    Takes: comp_id, season_id, match_id, hometeam (str)
+    Takes: comp_id (int), season_id (int), match_id (int), hometeam (str)
     Returns: events (a pandas DF)
     """
     matches = sb.matches(competition_id = comp_id, season_id = season_id)
@@ -124,7 +125,7 @@ def GetPlayers(match_id, team):
 
 def ReturnSubstitutionMinutes(events, team):
     """
-    Takes: events, team (str)
+    Takes: events (from CreateEventsDF), team (str)
     Returns: List of Lists with minutes and Seconds of Substitution
     """
     subs = events[events['type']=='Substitution']
@@ -134,7 +135,7 @@ def ReturnSubstitutionMinutes(events, team):
 
 def ReturnAvgPositionsDF(pass_df):
     """
-    Takes: pass_df
+    Takes: pass_df (from CreatePassDF)
     Returns: pass_bet (DF of passes between), avg_loc(DF of average locations)
     """
     pass_loc = pass_df['location']
@@ -277,6 +278,11 @@ def CreatexGDF(match_id):
 
 
 def PlotxG(xg_data):
+    """
+    Takes: xg_data(team1, shots_team1_xg_minute, 
+           team1_xg_cumu, team2, shots_team2_xg_minute, team2_xg_cumu)
+    Returns: Plot of the progress of xG between two teams
+    """
     team1, shots_team1_xg_minute, team1_xg_cumu, team2, shots_team2_xg_minute, team2_xg_cumu = xg_data
 
     fig, ax = plt.subplots(figsize=(13.5, 8))
