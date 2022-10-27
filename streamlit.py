@@ -49,7 +49,9 @@ def first_try():
         events = fx.CreateEventsDF(match_id=match_id)
 
         match_info = fx.ReturnScoreInfo(comp_id, season_id, match_id)
-        st.metric(input_id, f"{match_info[3][0]} : {match_info[3][1]}")
+
+        fi1, fi2, fi3 = st.columns(3)
+        fi2.metric(input_id, f"{match_info[3][0]} : {match_info[3][1]}")
 
         col1, col2 = st.columns(2)
         with col1:
