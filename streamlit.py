@@ -33,7 +33,7 @@ def first_try():
     competition = st.selectbox("Choose the competition", competitions)
 
     seasons = fx.ReturnSeasons(competition)
-    selected_season = st.selectbox("Choose a season", season)
+    selected_season = st.selectbox("Choose a season", seasons)
     competition_data = competition_data[competition_data['season_name'] == selected_season]
     season_id = competition_data['season_id'].iloc[0] #season_id for the season_name
 

@@ -13,7 +13,7 @@ from scipy.ndimage import gaussian_filter
 from statsbombpy import sb
 
 # funcs
-def PullSBData(competition_name, season):
+def PullSBData(competition_name):
     """
     Takes: Competition Name
     Returns: comp_id, season_id
