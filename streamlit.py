@@ -53,7 +53,7 @@ def first_try():
 
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown(f"#{hometeam}")
+            st.title(f"{hometeam}")
             pass_df = fx.CreatePassDF(events, hometeam)
             pass_bet, avg_loc = fx.ReturnAvgPositionsDF(pass_df)
 
@@ -64,7 +64,7 @@ def first_try():
             st.pyplot(fx.PlotPlayerDegrees(G))
 
         with col2:
-            st.markdown(f"#{awayteam}")
+            st.title(f"{awayteam}")
             pass_df = fx.CreatePassDF(events, awayteam)
             pass_bet, avg_loc = fx.ReturnAvgPositionsDF(pass_df)
 
