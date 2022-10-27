@@ -53,8 +53,13 @@ def first_try():
         hometeam=hometeam
         )
 
-        pass_df = fx.CreatePassDF(events, hometeam)
+        match_info = fx.ReturnScoreInfo(comp_id, season_id, match_id)
 
+        col1, col2, col3 = st.columns(3)
+
+        col2.metric(input_id, f"{match_info[3][0]} : {match_info[3][1]})")
+
+        pass_df = fx.CreatePassDF(events, hometeam)
         pass_bet, avg_loc = fx.ReturnAvgPositionsDF(pass_df)
 
         st.pyplot(fx.PlotPitch(pass_bet, avg_loc))

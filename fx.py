@@ -70,24 +70,19 @@ def ReturnScoreInfo(comp_id, season_id, match_id):
     scores = [int(m_id["home_score"]), int(m_id["away_score"])]
     return [match_id, date_time, teams, scores]
 
-def CreateEventsDF(comp_id, season_id, match_id, hometeam):
+def CreateEventsDF(match_id):
     """
-    Takes: comp_id (int), season_id (int), match_id (int), hometeam (str)
+    Takes: match_id (int)
     Returns: events (a pandas DF)
     """
-    matches = sb.matches(competition_id = comp_id, season_id = season_id)
-    matches = matches[matches['home_team'] == hometeam]
-    events = sb.events(match_id)
-    print("Number of matches: {}".format(len(matches)))
-    print("Number of events for a sample match: {}".format(len(events)))
-    return events
+    return sb.events(match_id)
 
 def CreatePassDF(events, hometeam):
     """
     Takes: events (created by CreateEventsDF), hometeam (str)
     Returns: pass_df (a DF with all pass information of the home team)
     """
-    events = events[['minute', 'second', 'team', 'location', 'period', 'type', 'pass_outcome', 'player', 'position', 'pass_end_location', 'pass_recipient']]
+    events = events[['minute', 'second', 'team', 'location', 'period', 'type', 'pass_outcome', 'player', 'pass_end_location', 'pass_recipient']]
     events = events.rename(columns={'pass_recipient': 'recipient'})
     team_df = events[events['team'] == hometeam]
     pass_df = team_df[team_df['type'] == 'Pass']
@@ -95,25 +90,6 @@ def CreatePassDF(events, hometeam):
     pass_df = pass_df[pass_df['pass_outcome'].isnull()] 
     pass_df['passer'] = pass_df['player']
     return pass_df
-
-# # not really sure what this function does and why - nice
-# def GetPlayers(events):
-#     """
-#     Takes: events (created by CreateEventsDF)
-#     returns: players_x (a DF of all players in a team)
-#     """
-#     tact = events[events['tactics'].isnull() == False]
-#     tact = tact[['tactics', 'team', 'type']]
-#     team_x = list(tact['team'])[0]
-#     tact_x = tact[tact['team'] == team_x]['tactics']
-#     dict_x = tact_x[0]['lineup']
-#     lineup_x = pd.DataFrame.from_dict(dict_x)
-#     players_x = {}
-#     for i in range(len(lineup_x)):
-#         key = lineup_x.player[i]['name']
-#         val = lineup_x.jersey_number[i]
-#         players_x[key] = str(val)
-#     return players_x
 
 def GetPlayers(match_id, team):
     """
@@ -123,8 +99,6 @@ def GetPlayers(match_id, team):
     lineup['player_nickname'].fillna(lineup['player_name'], inplace=True)
     players = list(lineup['player_nickname'])
     return dict(zip(list(lineup['player_nickname']), list(lineup['jersey_number'])))
-
-
 
 def ReturnSubstitutionMinutes(events, team):
     """
