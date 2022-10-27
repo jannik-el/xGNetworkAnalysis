@@ -48,9 +48,9 @@ def ReturnSeasons(competition_name):
 
 def ReturnSeason_Id(season):
     """
-
+    Takes the seaso
     """
-    competitions = sb.competitions()
+    competition_data = sb.competitions()
     competition_data = competition_data[competition_data['season_name'] == season]
     season_id = competition_data['season_id'].iloc[0] #season_id for the season_name
     return season_id
