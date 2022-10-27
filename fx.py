@@ -19,13 +19,13 @@ def ReturnComp_Id(competition_name):
     Returns: comp_id
     """
     competitions = sb.competitions()
-    comp_id = int(competitions[competitions['competition_name']==competition_name]['competition_id'])
-    # season_id = int(competitions[competitions['competition_name']==competition_name]['season_id'])
+    comp_id = int(competitions[competitions['competition_name']==competition_name]['competition_id'][0])
     return comp_id
 
 def ReturnMatchIDs(comp_id, season_id):
     """
-    Returns MatchIDs and Teams (for streamlit)
+    Takes: Competition ID and Season ID
+    Returns: MatchIDs and Teams (for streamlit)
     """
     matches = sb.matches(competition_id = comp_id, season_id = season_id)
     matchdict = {f'{list(matches["home_team"])[i]} vs {list(matches["away_team"])[i]}': list(matches["match_id"])[i] for i in range(len(list(matches["match_id"])))}
@@ -33,14 +33,16 @@ def ReturnMatchIDs(comp_id, season_id):
 
 def ReturnCompetitions():
     """
-    Returns names of Competitions in Statsbomb Dataset
+    Takes: nothing : - )
+    Returns: names of Competitions in Statsbomb Dataset
     """
     competitions = sb.competitions()
     return list(competitions["competition_name"].unique())
 
 def ReturnSeasons(competition_name):
     """
-    Returns Seasons in Statsbomb Dataset
+    Takes: Competition
+    Returns: Seasons in Statsbomb Dataset
     """
     competitions = sb.competitions()
     competition_data = competitions[competitions['competition_name']==competition_name]
@@ -48,7 +50,8 @@ def ReturnSeasons(competition_name):
 
 def ReturnSeason_Id(season):
     """
-    Takes the seaso
+    Takes: Season name
+    Returns: Season ID
     """
     competition_data = sb.competitions()
     competition_data = competition_data[competition_data['season_name'] == season]
