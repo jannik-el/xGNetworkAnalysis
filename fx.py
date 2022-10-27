@@ -13,32 +13,47 @@ from scipy.ndimage import gaussian_filter
 from statsbombpy import sb
 
 # funcs
-def PullSBData(competition_name, season):
+def ReturnComp_Id(competition_name):
     """
     Takes: Competition Name
-    Returns: comp_id, season_id
+    Returns: comp_id
     """
     competitions = sb.competitions()
     comp_id = int(competitions[competitions['competition_name']==competition_name]['competition_id'])
-    season_id = int(competitions[competitions['competition_name']==competition_name]['season_id'])
-    return comp_id, season_id
+    # season_id = int(competitions[competitions['competition_name']==competition_name]['season_id'])
+    return comp_id
 
 def ReturnMatchIDs(comp_id, season_id):
-    """Returns MatchIDs and Teams (for streamlit)"""
+    """
+    Returns MatchIDs and Teams (for streamlit)
+    """
     matches = sb.matches(competition_id = comp_id, season_id = season_id)
     matchdict = {f'{list(matches["home_team"])[i]} vs {list(matches["away_team"])[i]}': list(matches["match_id"])[i] for i in range(len(list(matches["match_id"])))}
     return matchdict
 
 def ReturnCompetitions():
-    """Returns Competitions in Statsbomb Dataset"""
+    """
+    Returns names of Competitions in Statsbomb Dataset
+    """
     competitions = sb.competitions()
     return list(competitions["competition_name"].unique())
 
 def ReturnSeasons(competition_name):
-    """Returns Seasons in Statsbomb Dataset"""
+    """
+    Returns Seasons in Statsbomb Dataset
+    """
     competitions = sb.competitions()
     competition_data = competitions[competitions['competition_name']==competition_name]
     return list(competition_data['season_name'].unique())
+
+def ReturnSeason_Id(season):
+    """
+
+    """
+    competitions = sb.competitions()
+    competition_data = competition_data[competition_data['season_name'] == season]
+    season_id = competition_data['season_id'].iloc[0] #season_id for the season_name
+    return season_id
 
 def ReturnScoreInfo(comp_id, season_id, match_id):
     """
@@ -77,7 +92,7 @@ def CreatePassDF(events, hometeam):
     pass_df['passer'] = pass_df['player']
     return pass_df
 
-# # not really sure what this function does and why
+# # not really sure what this function does and why - nice
 # def GetPlayers(events):
 #     """
 #     Takes: events (created by CreateEventsDF)
