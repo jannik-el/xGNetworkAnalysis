@@ -5,6 +5,7 @@ import networkx as nx
 import sys
 sys.path.insert(0, "./")
 import fx
+from statsbombpy import sb
 
 
 ##### HEADER #####
