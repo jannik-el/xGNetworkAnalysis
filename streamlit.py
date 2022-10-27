@@ -46,12 +46,7 @@ def first_try():
     hometeam = st.radio("Input a hometeam here:", input_id.rsplit(" vs "))
 
     if st.button("Run the analysis:"):
-        events = fx.CreateEventsDF(
-        comp_id=comp_id, 
-        season_id=season_id, 
-        match_id=match_id, 
-        hometeam=hometeam
-        )
+        events = fx.CreateEventsDF(match_id=match_id)
 
         match_info = fx.ReturnScoreInfo(comp_id, season_id, match_id)
 
