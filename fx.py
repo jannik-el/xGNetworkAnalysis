@@ -116,6 +116,9 @@ def CreatePassDF(events, hometeam):
 #     return players_x
 
 def GetPlayers(match_id, team):
+    """
+    Takes: match ID (int), team (str)
+    """
     lineup = sb.lineups(match_id=match_id)[team]
     lineup['player_nickname'].fillna(lineup['player_name'], inplace=True)
     players = list(lineup['player_nickname'])
@@ -176,7 +179,7 @@ def PlotPitch(pass_bet, avg_loc):
 
 def ReturnNXPassNetwork(pass_bet):
     """
-    Takes: pass_bet
+    Takes: pass_bet (from ReturnAvgPositionsDF)
     Returns: G (NX Pass Network)
     """
     graph = pass_bet[['passer', 'recipient', 'pass_count']]
@@ -188,7 +191,7 @@ def ReturnNXPassNetwork(pass_bet):
 
 def PlotPlayerDegrees(G):
     """
-    Takes: G (NX Pass Network)
+    Takes: G (NX Pass Network from ReturnNXPassNetwork)
     Returns: plt.show() of different 
     """
     
@@ -244,7 +247,7 @@ def PlotPlayerDegrees(G):
 
 def CreatexGDF(match_id):
     """
-    Takes: Match ID
+    Takes: Match ID (int)
     # Returns: list of xG data + team names in that order:
                 [Team 1 name, Team 1 xG minutes, Team 1 Cumulative xG, Team 2 name, Team 2 xG minutes, Team 2 Cumulative xG]
     """
@@ -272,7 +275,7 @@ def CreatexGDF(match_id):
     shots_team1_xg_minute = [0] + shots_team1_xg_minute + [int((shots_team1_xg_minute[-1] + 1))]
     shots_team2_xg_minute = [0] + shots_team2_xg_minute + [int((shots_team1_xg_minute[-1] + 1))]
     team1_xg_cumu = [0] + team1_xg_cumu + [(team1_xg_cumu[-1])]
-    team2_xg_cumu = [0] + team2_xg_cumu + [(team1_xg_cumu[-1])]
+    team2_xg_cumu = [0] + team2_xg_cumu + [(team2_xg_cumu[-1])]
 
     return [team1, shots_team1_xg_minute, team1_xg_cumu, team2, shots_team2_xg_minute, team2_xg_cumu]
 
