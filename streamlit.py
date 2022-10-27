@@ -51,6 +51,7 @@ def first_try():
         match_info = fx.ReturnScoreInfo(comp_id, season_id, match_id)
 
         fi1, fi2, fi3 = st.columns(3)
+        fi1.metric("Match Date:", match_info[2][0:8])
         fi2.metric(input_id, f"{match_info[3][0]} : {match_info[3][1]}")
 
         col1, col2 = st.columns(2)
