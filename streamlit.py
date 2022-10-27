@@ -43,25 +43,34 @@ def first_try():
     input_id = st.selectbox("Choose a Match:", match_data.keys())
     match_id = match_data.get(input_id)
 
-    hometeam = st.radio("Input a hometeam here:", input_id.rsplit(" vs "))
+    hometeam, awayteam = input_id.rsplit(" vs ")
 
     if st.button("Run the analysis:"):
         events = fx.CreateEventsDF(match_id=match_id)
 
         match_info = fx.ReturnScoreInfo(comp_id, season_id, match_id)
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
+        st.metric(input_id, f"{match_info[3][0]} : {match_info[3][1]}")
 
-        col3.metric(input_id, f"{match_info[3][0]} : {match_info[3][1]}")
+        with col1:
+            pass_df = fx.CreatePassDF(events, hometeam)
+            pass_bet, avg_loc = fx.ReturnAvgPositionsDF(pass_df)
 
-        pass_df = fx.CreatePassDF(events, hometeam)
-        pass_bet, avg_loc = fx.ReturnAvgPositionsDF(pass_df)
+            st.pyplot(fx.PlotPitch(pass_bet, avg_loc))
 
-        st.pyplot(fx.PlotPitch(pass_bet, avg_loc))
+            G = fx.ReturnNXPassNetwork(pass_bet)
 
-        G = fx.ReturnNXPassNetwork(pass_bet)
+            st.pyplot(fx.PlotPlayerDegrees(G))
 
-        st.pyplot(fx.PlotPlayerDegrees(G))
+        with col2:
+            pass_df = fx.CreatePassDF(events, awayteam)
+            pass_bet, avg_loc = fx.ReturnAvgPositionsDF(pass_df)
+
+            st.pyplot(fx.PlotPitch(pass_bet, avg_loc))
+            G = fx.ReturnNXPassNetwork(pass_bet)
+
+            st.pyplot(fx.PlotPlayerDegrees(G))
 
         xG_data = fx.CreatexGDF(match_id=match_id)
 
