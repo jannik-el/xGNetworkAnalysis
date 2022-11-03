@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from mplsoccer import Pitch, VerticalPitch
 from scipy.ndimage import gaussian_filter
 from statsbombpy import sb
+from dateutil import parser
 
 # funcs
 def ReturnComp_Id(competition_name):
@@ -99,6 +100,22 @@ def GetPlayers(match_id, team):
     lineup['player_nickname'].fillna(lineup['player_name'], inplace=True)
     players = list(lineup['player_nickname'])
     return dict(zip(list(lineup['player_nickname']), list(lineup['jersey_number'])))
+
+def get_team_names(comp_id = None,season_id = None, match_id = None):
+    """
+    Takes: either comp_id and season_id or match_id
+    Returns: list of team names for eligible games
+    """
+    if ((not comp_id or not season_id) and not match_id):
+        print('this just got exectued')
+        raise RuntimeError('Wrong input: either both comp_id and season_id or just match_id')
+    if match_id:
+        return list(sb.events(match_id)['team'].unique())
+    else:
+        match_ids_dict = fx.ReturnMatchIDs(comp_id, season_id)
+        team_names = [s.split(' vs ') for s in match_ids_dict.keys()]
+        if len(team_names) == 1 : return team_names[0]
+        return team_names
 
 def ReturnSubstitutionMinutes(events, team):
     """
@@ -273,3 +290,86 @@ def PlotxG(xg_data):
     ax.legend(borderpad=1, markerscale=0.5, labelspacing=1.5, fontsize=10)
     ax.title.set_text(f"The xG Progress Chart Between {team1} against {team2}")
     return plt.show()
+
+def SplitEvents(events_df, min_event_time):
+    """
+    Takes: Events_df, min_event_time
+    Returns: List of events_df for splits in game
+    """
+    events_df = events_df[['id', 'period', 'timestamp', 'minute', 'second', 
+                        'team', 'player','location', 'type', 
+                        'pass_outcome', 'shot_outcome', 'shot_statsbomb_xg', 
+                        'pass_end_location', 'pass_recipient']]
+
+    events_df = events_df.sort_values(['period','timestamp'], ascending=[True, True])
+    events_df=events_df.reset_index()
+    events_df = events_df.drop("index", axis=1)
+    events_df = events_df.reset_index()
+
+    goal = events_df[events_df['shot_outcome']=='Goal']
+    goals_index_lst = list(events_df[events_df['shot_outcome']=='Goal'].index)
+    subs = events_df[events_df['type']=='Substitution']
+    subs_index_lst = list(events_df[events_df['type']=='Substitution'].index)
+
+    period_index_lst = []
+    for i in events_df['period'].unique():
+        idx = events_df[events_df['period'] == i].index[0]
+        period_index_lst.append(idx)
+
+    goals_index_dct = {x+1:"goal" for x in goals_index_lst}
+    subs_index_dct = {x+1:"sub" for x in subs_index_lst}
+    breaks_index_dct = {x+1:"break" for x in period_index_lst}
+
+    splitting_events = {**goals_index_dct, **subs_index_dct, **breaks_index_dct}
+    splitting_sorted = sorted(list(splitting_events.keys()))
+
+    splitting_df = pd.DataFrame.from_dict(splitting_events, orient='index', columns=["event"])
+    splitting_df = splitting_df.reset_index()
+    
+    clean_splitting_df=splitting_df.merge(events_df, on='index')
+    clean_splitting_df = clean_splitting_df.sort_values("index")
+
+    clean_splitting_df['timestamp'] = clean_splitting_df['timestamp'].apply(lambda x: parser.parse(x))
+
+    clean_splitting_df['time_delta'] =  clean_splitting_df['timestamp'] - clean_splitting_df['timestamp'].shift(1, fill_value=0)
+
+    clean_splitting_df['time_delta'] = clean_splitting_df['time_delta'].astype('timedelta64[m]')
+    clean_splitting_df = clean_splitting_df.reset_index()
+
+    breaks_idx = clean_splitting_df.index[clean_splitting_df['event'] == 'break'].tolist()
+    
+    for i in breaks_idx:
+        clean_splitting_df['time_delta'].iloc[i] = 0
+    
+    splits = []
+    delta = 0
+    for time_diff, index, event in zip(clean_splitting_df['time_delta'], clean_splitting_df['index'], clean_splitting_df['event']):
+        if event == 'break':
+            splits.append(index)
+            delta = 0
+        elif time_diff > min_event_time or delta > min_event_time:
+            splits.append(index)
+            delta = 0
+        else:
+            delta += time_diff
+
+    splits[0] = 0
+    splits.append(events_df['index'].iloc[-1])
+
+    idx_lst = [] 
+    for i in range(len(splits)):
+        if splits[i] == 0:
+            idx_lst.append([splits[i], splits[i+1]])
+        else:
+            idx_lst.append([splits[i], splits[i+1]])
+        if splits[i+1] == splits[-1]:
+            break
+            
+    idx_lst[-1][-1] = idx_lst[-1][-1]+1
+
+    df_lst = []
+    for i in idx_lst:
+        df = events_df.iloc[i[0]:i[1],:]
+        df_lst.append(df)
+
+    return df_lst
