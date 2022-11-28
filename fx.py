@@ -12,6 +12,8 @@ from mplsoccer import Pitch, VerticalPitch
 from scipy.ndimage import gaussian_filter
 from statsbombpy import sb
 from dateutil import parser
+import statistics
+
 
 # funcs
 def ReturnComp_Id(competition_name):
@@ -306,6 +308,9 @@ def SplitEvents(events_df, min_event_time):
     events_df = events_df.drop("index", axis=1)
     events_df = events_df.reset_index()
 
+    half_ends_lst = dict(zip(events_df[events_df['type']=='Half End']['period'], events_df[events_df['type']=='Half End']['timestamp']))
+
+
     goal = events_df[events_df['shot_outcome']=='Goal']
     goals_index_lst = list(events_df[events_df['shot_outcome']=='Goal'].index)
     subs = events_df[events_df['type']=='Substitution']
@@ -320,7 +325,7 @@ def SplitEvents(events_df, min_event_time):
     subs_index_dct = {x+1:"sub" for x in subs_index_lst}
     breaks_index_dct = {x+1:"break" for x in period_index_lst}
 
-    splitting_events = {**goals_index_dct, **subs_index_dct, **breaks_index_dct}
+    splitting_events = {**goals_index_dct, **subs_index_dct, **breaks_index_dct} # very pretty line
     splitting_sorted = sorted(list(splitting_events.keys()))
 
     splitting_df = pd.DataFrame.from_dict(splitting_events, orient='index', columns=["event"])
@@ -335,6 +340,12 @@ def SplitEvents(events_df, min_event_time):
 
     clean_splitting_df['time_delta'] = clean_splitting_df['time_delta'].astype('timedelta64[m]')
     clean_splitting_df = clean_splitting_df.reset_index()
+
+    clean_splitting_df['half_end'] = clean_splitting_df['period'].map(half_ends_lst)
+    clean_splitting_df['half_end'] = clean_splitting_df['half_end'].apply(lambda x: parser.parse(x))
+    clean_splitting_df['diff_to_half_end'] = clean_splitting_df['half_end'] - clean_splitting_df['timestamp']
+    clean_splitting_df['diff_to_half_end'] = clean_splitting_df['diff_to_half_end'].astype('timedelta64[m]')
+    clean_splitting_df = clean_splitting_df[clean_splitting_df['diff_to_half_end'] > min_event_time]
 
     breaks_idx = clean_splitting_df.index[clean_splitting_df['event'] == 'break'].tolist()
     
@@ -373,3 +384,83 @@ def SplitEvents(events_df, min_event_time):
         df_lst.append(df)
 
     return df_lst
+
+def get_stats_from_network(G, stats_all=False, plotting=False, axes=None, curr_idx = None):
+    """
+    Takes: graph (from fx.ReturnNXPassNetwork), stats_all (optional) = bool, plotting (optional) = bool
+    l_r (last row) (optional) = int, axes = optional
+    Returns: Pandas DataFrame of network statistics of the team
+    """
+    pathlengths = []
+
+    for v in G.nodes():
+        spl = dict(nx.single_source_shortest_path_length(G, v))
+        for p in spl:
+            pathlengths.append(spl[p])
+    dist = {}
+    for p in pathlengths:
+        if p in dist:
+            dist[p] += 1
+        else:
+            dist[p] = 1
+    verts = dist.keys()
+    clustering=[]
+    names=[]
+    for i in G.nodes:
+        names.append('Clustering of '+i)
+        clustering.append(nx.clustering(G,i))
+    if not stats_all:
+        data={'Properties':(['Strongly connected','Weakly connected','Average shortest path length',
+        'Radius','Diameter','Average Eccentricity','Center',
+        'Average Eigenvector centrality','Periphery','Density',
+        'Average Clustering']),
+        'Values':([nx.is_strongly_connected(G),nx.is_weakly_connected(G),nx.average_shortest_path_length(G),
+        nx.radius(G), nx.diameter(G),statistics.mean(list(nx.eccentricity(G).values())),nx.center(G)[0],
+        statistics.mean(list(nx.eigenvector_centrality(G).values())),nx.periphery(G),nx.density(G),
+        statistics.mean(list(nx.clustering(G).values()))])}
+    else:
+        data={'Strongly connected': [nx.is_strongly_connected(G)], 'Weakly connected': [nx.is_weakly_connected(G)], 
+            'Average shortest path length': [nx.average_shortest_path_length(G)], 'Radius': [nx.radius(G)],
+            'Diameter' : [nx.diameter(G)], 'Average Eccentricity' : [statistics.mean(list(nx.eccentricity(G).values()))],
+            'Center' : nx.center(G)[0],
+            'Average Eigenvector centrality': [statistics.mean(list(nx.eigenvector_centrality(G).values()))],
+            'Periphery' : nx.periphery(G),'Density' : [nx.density(G)],
+            'Average Clustering': [statistics.mean(list(nx.clustering(G).values()))]} # 'Core' : nx.core_number(G)
+        clustrs = list(zip(names,clustering))
+        df = pd.DataFrame(data)
+        for pair in clustrs:
+            df[pair[0]] = [pair[1]]  
+    if plotting:
+        dist = pd.DataFrame({'path_length':list(dist.keys()), 'count':list(dist.values())})
+        if curr_idx:
+            sns.barplot(data=dist, x='path_length', y='count', ax=axes[0 + curr_idx*2]).set(title='Counts of shortest path lengths')
+        else:
+            sns.barplot(data=dist, x='path_length', y='count', ax=axes[0]).set(title='Counts of shortest path lengths')
+        kcores = defaultdict(list)
+        for n, k in nx.core_number(G).items():
+            kcores[k].append(n) #append node to appropriate core
+        max_core = int(max(kcores.keys()))
+        pos = nx.layout.shell_layout(G, list(kcores.values()))
+        for node in G.nodes():
+            cmap = plt.get_cmap('plasma')
+            if curr_idx:
+                nx.draw_networkx_nodes(G, pos, nodelist=[node],
+                node_color=np.array([cmap(nx.core_number(G)[node]/max_core)]), ax=axes[1 + curr_idx*2]) #plt magic <3,  numpy array is there to get rid of a warning
+                nx.draw_networkx_labels(G,pos,labels={node:nx.core_number(G)[node] for node in G.nodes()}, ax=axes[1 + curr_idx*2])
+            else:
+                nx.draw_networkx_nodes(G, pos, nodelist=[node],
+                node_color=np.array([cmap(nx.core_number(G)[node]/max_core)]), ax=axes[1]) #forgive the if's :(
+                nx.draw_networkx_labels(G,pos,labels={node:nx.core_number(G)[node] for node in G.nodes()}, ax=axes[1])  
+        maxWeight = max([edge[2]['weight'] for edge in list(G.edges(data=True))])   
+        if curr_idx:
+            for edge in G.edges(data='weight'):
+                nx.draw_networkx_edges(G, pos, edgelist=[edge],width=(edge[2]/maxWeight+1)**2,
+                                        alpha=edge[2]/maxWeight, arrows="FancyArrowPatch", ax=axes[1 + curr_idx*2])
+        else:
+            for edge in G.edges(data='weight'):
+                nx.draw_networkx_edges(G, pos, edgelist=[edge],width=(edge[2]/maxWeight+1)**2,
+                                        alpha=edge[2]/maxWeight, arrows="FancyArrowPatch", ax=axes[1])
+        
+    if not ('df' in locals()): df = pd.DataFrame(data)
+
+    return df
