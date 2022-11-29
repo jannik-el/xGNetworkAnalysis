@@ -402,9 +402,110 @@ def SplitEvents(events_df, min_event_time):
     df_lst = []
     for i in idx_lst:
         df = events_df.iloc[i[0]:i[1],:]
-        df_lst.append(df)
+        df = df.drop(df[df.period == 5].index)
+        df_lst.append(df) 
 
     return df_lst
+
+def SaveData(data, file):
+    DF = pd.DataFrame(data, columns=[
+        "Team",
+        "MatchID",
+        "Split No.",
+        "Delta Time",
+        "Delta xG",
+        "Weakly Connected",
+        "Strongly Connected",
+        "Average Shortest Path",
+        "Radius",
+        "Diameter",
+        "Eccentricity Mean",
+        "Central Node",
+        "Average Eigenvector Centrality",
+        "Density",
+        "Mean Clustering"])
+    DF.to_csv(file)
+    return print("Done")
+
+def SplitAllGames(min_event_time, match_ids, filename):
+    data = []
+    for i, j in enumerate(tqdm(match_ids, ncols=100)):
+
+        events_df = CreateEventsDF(j)
+        intervals = SplitEvents(events_df, min_event_time)
+
+        teams = [events_df["team"].unique()[0], events_df["team"].unique()[1]]
+
+        for team in teams:
+            for x, t in enumerate(intervals):
+                df_events = t[t['team']==team]
+                df_shots = df_events[df_events['shot_outcome'].isnull()==False]
+                xg_list = list(df_shots["shot_statsbomb_xg"])
+                cumulative_xg = list(np.cumsum(xg_list))
+                cumulative_xg = [0] + cumulative_xg
+                
+                delta_xg = cumulative_xg[-1] - cumulative_xg[0]
+
+
+                pass_df = CreatePassDF(t, team)
+                if pass_df.empty == True:
+                    pass
+                elif pass_df.empty == False:
+                    avg_position = ReturnAvgPositionsDF(pass_df)[0]
+                    G = ReturnNXPassNetwork(avg_position)
+
+                    delta_time = pass_df["minute"].tail(1).tolist()[0] - pass_df["minute"].head(1).tolist()[0]
+                    
+            
+                    try: 
+                        strng = nx.is_strongly_connected(G)
+                    except:
+                        strng = "Error"
+
+                    try:
+                        weak = nx.is_weakly_connected(G)
+                    except:
+                        weak = "Error"
+
+                    try:
+                        rad = nx.radius(G)
+                    except:
+                        rad = "Error"
+
+                    try: 
+                        diam = nx.diameter(G)
+                    except:
+                        diam = "Error"
+
+                    try: 
+                        ecc = statistics.mean(list(nx.eccentricity(G).values()))
+                    except: 
+                        ecc = "Error"
+
+                    try:
+                        cent = nx.center(G)[0]
+                    except:
+                        cent = "Error"
+
+                    try:
+                        avg_lngth = nx.average_shortest_path_length(G)
+                    except:
+                        avg_lngth = "Error"
+
+                    try:
+                        avg_eigen = statistics.mean(list(nx.eigenvector_centrality(G).values()))
+                    except:
+                        avg_eigen = "Error"
+
+                    try: 
+                        clust_mean = statistics.mean(list(nx.clustering(G).values()))
+                    except:
+                        clust_mean = "Error"
+
+                    data_interval = [team,j,x, delta_time,delta_xg, weak,strng,avg_lngth,rad,diam,ecc,cent,avg_eigen,nx.density(G),clust_mean]
+                    data.append(data_interval)
+    SaveData(data, filename)
+    return 
 
 def get_stats_from_network(G, stats_all=False, plotting=False, axes=None, curr_idx = None):
     """
