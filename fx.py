@@ -13,6 +13,8 @@ from scipy.ndimage import gaussian_filter
 from statsbombpy import sb
 from dateutil import parser
 import statistics
+from itertools import chain
+from tqdm import tqdm
 
 
 # funcs
@@ -25,7 +27,7 @@ def ReturnComp_Id(competition_name):
     comp_id = list(competitions[competitions['competition_name']==competition_name]['competition_id'])[0]
     return comp_id
 
-def ReturnMatchIDs(comp_id, season_id):
+def ReturnMatchID_Dict(comp_id, season_id):
     """
     Takes: Competition ID and Season ID (both int)
     Returns: MatchIDs and Teams (for streamlit)
@@ -33,6 +35,28 @@ def ReturnMatchIDs(comp_id, season_id):
     matches = sb.matches(competition_id = comp_id, season_id = season_id)
     matchdict = {f'{list(matches["home_team"])[i]} vs {list(matches["away_team"])[i]}': list(matches["match_id"])[i] for i in range(len(list(matches["match_id"])))}
     return matchdict
+
+def ReturnMatchID_List():
+    """
+    Returns a list of every single matchID
+    """
+    seasonid_dict = {}
+    for c in ReturnCompetitions():
+        season_ids = [ReturnSeason_Id(i) for i in ReturnSeasons(c)]
+        comp_id = ReturnComp_Id(c)
+        seasonid_dict.setdefault(comp_id, season_ids)
+    # seasonid 16, comp 76 was causing some problems, idk y
+    seasonid_dict[16].pop(-1)
+    
+    match_ids = []
+    for x, i in enumerate(tqdm(seasonid_dict.items())):
+        for j in i[1]:
+            matchidcol = list(sb.matches(i[0], j)["match_id"].values)
+            match_ids.append(matchidcol)
+
+    match_ids = list(chain(*match_ids))
+
+    return match_ids
 
 def ReturnCompetitions():
     """
