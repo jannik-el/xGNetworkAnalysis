@@ -347,10 +347,7 @@ def SplitEvents(events_df, min_event_time):
     clean_splitting_df['diff_to_half_end'] = clean_splitting_df['diff_to_half_end'].astype('timedelta64[m]')
     clean_splitting_df = clean_splitting_df[clean_splitting_df['diff_to_half_end'] > min_event_time]
 
-    breaks_idx = clean_splitting_df.index[clean_splitting_df['event'] == 'break'].tolist()
-    
-    for i in breaks_idx:
-        clean_splitting_df['time_delta'].iloc[i] = 0
+    clean_splitting_df.loc[clean_splitting_df["event"] == 'break', "time_delta"] = 0
     
     splits = []
     delta = 0
