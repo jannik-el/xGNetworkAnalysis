@@ -533,7 +533,7 @@ def SplitItSynthetic(min_event_time, match_ids, filename, undirected=False):
 
         for team in teams:
             for x, t in enumerate(intervals):
-                pass_df = fx.CreatePassDF(t, team)
+                pass_df = CreatePassDF(t, team)
                 if not pass_df.empty:
                     df_events = t[t['team']==team]
                     df_shots = df_events[df_events['shot_outcome'].isnull()==False]
@@ -548,8 +548,8 @@ def SplitItSynthetic(min_event_time, match_ids, filename, undirected=False):
                     period_lst = df_events['period'][1:-1]
                     period = period_lst.unique()[0]    
                     
-                    avg_position = fx.ReturnAvgPositionsDF(pass_df)[0]
-                    G = fx.ReturnNXPassNetwork(avg_position)
+                    avg_position = ReturnAvgPositionsDF(pass_df)[0]
+                    G = ReturnNXPassNetwork(avg_position)
 
                     delta_time = df_events.iloc[-1]["minute"]- df_events.iloc[0]["minute"]
                     # delta_time = df_events["minute"].tail(1).tolist()[0] - df_events["minute"].head(1).tolist()[0]
