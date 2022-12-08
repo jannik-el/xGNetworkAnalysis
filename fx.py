@@ -293,7 +293,7 @@ def PlotxG(xg_data):
     ax.title.set_text(f"The xG Progress Chart Between {team1} against {team2}")
     return plt.show()
 
-def SplitEvents(events_df, min_event_time):
+def SplitEvents(events_df, min_event_time=5):
     """
     Takes: Events_df, min_event_time
     Returns: List of events_df for splits in game
@@ -349,20 +349,20 @@ def SplitEvents(events_df, min_event_time):
 
     breaks_idx = clean_splitting_df.index[clean_splitting_df['event'] == 'break'].tolist()
     
-    for i in breaks_idx:
-        clean_splitting_df['time_delta'].iloc[i] = 0
-    
+    clean_splitting_df.loc[clean_splitting_df["event"] == 'break', "time_delta"] = 0    
+
     splits = []
     delta = 0
     for time_diff, index, event in zip(clean_splitting_df['time_delta'], clean_splitting_df['index'], clean_splitting_df['event']):
+        delta += time_diff
         if event == 'break':
             splits.append(index)
             delta = 0
         elif time_diff > min_event_time or delta > min_event_time:
             splits.append(index)
             delta = 0
-        else:
-            delta += time_diff
+        # else:
+            # delta += time_diff
 
     splits[0] = 0
     splits.append(events_df['index'].iloc[-1])
@@ -381,6 +381,7 @@ def SplitEvents(events_df, min_event_time):
     df_lst = []
     for i in idx_lst:
         df = events_df.iloc[i[0]:i[1],:]
+        df = df.drop(df[df.period == 5].index)
         df_lst.append(df)
 
     return df_lst
