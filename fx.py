@@ -13,6 +13,8 @@ from scipy.ndimage import gaussian_filter
 from statsbombpy import sb
 from dateutil import parser
 import statistics
+from tqdm import tqdm
+import time
 
 
 # funcs
